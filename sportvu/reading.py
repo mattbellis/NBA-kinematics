@@ -230,6 +230,32 @@ def get_player_data(files):
     return player_data
 ################################################################################
 
+######## HELPER FUNCTIONS TO READ IN DATA ########################################
+def getMinsPlayed(team, players):
+    for p in players:
+        count = 0
+        for i in range(0,len(team['%s' %p]['t'])-1):
+            if team['%s' %p]['t'][i] != team['%s' %p]['t'][i+1]:
+                count += 1.
+        team['%s' %p]['mins'] = count/25./60
+        
+def shots(shotclock):
+    shotTimes = []
+    a = '24.00'
+    for i in range(0, len(shotclock)-1):
+        if shotclock[i] != a and shotclock[i+1] == a:
+                #numShots += 1
+                r = shotclock[i]
+                if len(r) > 1:
+                    b = (float)(r)
+                    shotTimes.append((float)(b))
+                else:
+                    shotTimes.append(0.0)
+        else:
+            shotTimes.append(-1)
+    return shotTimes
+
+################################################################################
 
 ################################################################################
 def get_sportvu_data(filename):
