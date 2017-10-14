@@ -268,26 +268,45 @@ def plot_position(team):
         
         plt.plot(x,y,linewidth = 0.5)
         
-def velocity(d,t):
-    v = []
-    holder = []
-    for i in range(0, len(d)-2):
-        if abs(((float)(t[i+2])-(float)(t[i]))) > .01 and abs(((float)(t[i+2])-(float)(t[i]))) < .09:
-            v.append(abs(((float)(d[i+2])-(float)(d[i])/((float)(t[i+2])-(float)(t[i])))))
-        else:
-            v.append(0)
+#def velocity(d,t):
+ #   v = []
+  #  holder = []
+   # for i in range(0, len(d)-2):
+    #    if abs(((float)(t[i+2])-(float)(t[i]))) > .01 and abs(((float)(t[i+2])-(float)(t[i]))) < .09:
+     #       v.append(abs(((float)(d[i+2])-(float)(d[i])/((float)(t[i+2])-(float)(t[i])))))
+      #  else:
+       #     v.append(0)
 
     #if len(v) != len(t):
      #   del t[0]
       #  del t[len(t)-1]
 ####### accounts for outlying points, v > 32 fps ( 22 mph) ############
+   # for j in range(0,len(v)):
+    #    if v[j] > 10:
+     #           v[j] = v[j-1]
+
+   # return v
+        
+def velocity(d,t):
+    v = []
+    time = []
+    for i in range(1, len(d)-1):
+        if abs(((float)(t[i+1])-(float)(t[i-1]))) > .01 and abs(((float)(t[i+1])-(float)(t[i-1]))) < .09:
+            v.append(abs(((float)(d[i+1])-(float)(d[i-1])/((float)(t[i+1])-(float)(t[i-1])))))
+            time.append(t[i])
+        else:
+            ### means timeout or not in game
+            v.append(-1)
+            time.append(-1)
+            
+        
+
+        ####### accounts for outlying points ############
     for j in range(0,len(v)):
         if v[j] > 10:
                 v[j] = v[j-1]
 
-    return v
-        
-    
+    return v    
     
     
     
@@ -1073,10 +1092,28 @@ def series_velo(teams, key):
 
             t = teams.index(team) + 1
             v = float(sum(team['%s' % key]['v']))/len(team['%s' % key]['v'])
+            
+            v_holder = []
 
+            for v in team['%s' % key]['v']:
+                if v == (-1):
 
+                    v_holder.append(v)
 
-            plt.plot(t,v, 'o', label = 'Game %d' % (teams.index(team)+1), linewidth = 0.5)
+            v = team['%s' % key]['v']
+            v_graph = (sum(v) + len(v_holder))/(len(v)-len(v_holder)) 
+            
+            '''
+            
+            The above line takes the average of point in which the player IS MOVING,
+            not just on the bench.  Since each point at which the player is on the 
+            bench = -1 (m/s), by adding -1*n_{points of time on the bench} to the 
+            sum of list 'v', we get the real sum.  The length is then equal to the 
+            length of v - n_{points of time on the bench}.
+            
+            '''
+
+            plt.plot(t,v_graph, 'o', label = 'Game %d' % (teams.index(team)+1), linewidth = 0.5)
 
             plt.legend()
             
