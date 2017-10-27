@@ -161,8 +161,8 @@ def get_player_data(files):
         
         hometeam[str(h)]['m'] = []
 
-        #hometeam[str(h)]['ke'] = []
-        #hometeam[str(h)]['power'] = []
+        hometeam[str(h)]['ke'] = []
+        hometeam[str(h)]['power'] = []
         hometeam[str(h)]['mins'] = 0
         
 
@@ -179,8 +179,8 @@ def get_player_data(files):
         awayteam[str(h)]['m'] = []
 
         
-        #awayteam[str(h)]['ke'] = []
-        #awayteam[str(h)]['power'] = []
+        awayteam[str(h)]['ke'] = []
+        awayteam[str(h)]['power'] = []
         awayteam[str(h)]['mins'] = 0
       
     for h in balls:
@@ -208,8 +208,8 @@ def get_player_data(files):
             v = p[i][7]
             m = p[i][6]
             t = p[i][8]
-            #ke = p[i][8]
-            #power = p[i][9]
+            ke = p[i][9]
+            power = p[i][10]
             #print(teamid,homeid)
             if teamid==homeid:
                 hometeam[pid]['x'].append(x)
@@ -219,8 +219,8 @@ def get_player_data(files):
                 hometeam[pid]['gametime'].append(gt)
                 hometeam[pid]['v'].append(v)
                 hometeam[pid]['t'].append(t)
-                #hometeam[pid]['ke'].append(ke)
-                #hometeam[pid]['power'].append(power)
+                hometeam[pid]['ke'].append(ke)
+                hometeam[pid]['power'].append(power)
 
             elif teamid==awayid:
                 awayteam[pid]['x'].append(x)
@@ -230,8 +230,8 @@ def get_player_data(files):
                 awayteam[pid]['gametime'].append(gt)
                 awayteam[pid]['v'].append(v)
                 awayteam[pid]['t'].append(t)
-                #awayteam[pid]['ke'].append(ke)
-                #awayteam[pid]['power'].append(power)
+                awayteam[pid]['ke'].append(ke)
+                awayteam[pid]['power'].append(power)
             elif teamid==ballid:
                 ball[pid]['x'].append(x)
                 ball[pid]['y'].append(y)

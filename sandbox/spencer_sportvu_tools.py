@@ -214,7 +214,7 @@ def get_string(ID_number):
 
 def get_mass(team):
     
-    for key in list(team.keys()):
+    for key in team.keys():
         
 
         infile = open('Player_ID.csv','r')
@@ -261,7 +261,7 @@ def distance(x,y,z):
 def plot_position(team):
     plt.figure(figsize = (9,4))
     
-    for key in list(team.keys()):
+    for key in team.keys():
         
         x = team['%s' % (key)]['x']
         y = team['%s' % (key)]['y']
@@ -320,7 +320,7 @@ def plot_velo(team):
     plt.figure(figsize = (9,4))
     plt.xlabel('Time (s)')
     plt.ylabel('Speed (m/s)')
-    for key in list(team.keys()):
+    for key in team.keys():
         
         
         t = team['%s' % (key)]['t']
@@ -346,7 +346,7 @@ def plot_velo(team):
 
 def plot_velo_individuals(team):
     
-    for key in list(team.keys()):
+    for key in team.keys():
         plt.figure(figsize = (9,4))
         plt.xlabel('Time (s)')
         plt.ylabel('Speed (m/s)')
@@ -462,7 +462,7 @@ def plot_power(team):
     
     labels = []
     
-    for key in list(team.keys()):
+    for key in team.keys():
         
         
         data.append(team['%s' % (key)]['P'])
@@ -653,12 +653,12 @@ def shooting_stats(ball):
 
 
 
-    print("%d shots were calculated to be made in this game." % counter)
+    print "%d shots were calculated to be made in this game." % counter
 
 
-    print("The home team made %d shots." % home_shots)
+    print "The home team made %d shots." % home_shots
 
-    print("The away team made %d shots." % away_shots)
+    print "The away team made %d shots." % away_shots
     
     
     
@@ -739,7 +739,7 @@ def get_player_IDs_series(team_series):
     
     for team in team_series:
         
-        for key in list(team.keys()):
+        for key in team.keys():
             
             Keyz.append(key)
 
@@ -1086,7 +1086,7 @@ def series_velo(teams, key):
     
     for team in teams:
         
-        if str(key) in list(team.keys()):
+        if str(key) in team.keys():
 
 
 
