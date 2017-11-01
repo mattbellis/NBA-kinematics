@@ -5,6 +5,7 @@ import csv
 ################################################################################
 def get_player_data(files):
         
+        
     playerdata = np.loadtxt('Player_ID.csv',delimiter=',',dtype=str,skiprows=1,unpack=True)
     pd_ids = playerdata[0].astype(int)
     pd_names = playerdata[1]
@@ -338,8 +339,9 @@ def getVelocity(players):
 
         p[len(p)-1].append(v[len(v)-1])
         p[len(p)-1].append(time[len(time)-1])
-        p[len(p)-2].append(time[len(time)-2])
         p[len(p)-2].append(v[len(v)-2])
+        #### bug area i think ########
+        p[len(p)-2].append(time[len(time)-2])
         for k in range(1,len(p)-2):
         #print len(v), len(players[0])
     
