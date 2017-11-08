@@ -406,7 +406,8 @@ def getPower(players):
             p[k].append(pt[k])
                 
     
-            
+
+
         
 
 
