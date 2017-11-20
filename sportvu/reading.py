@@ -406,6 +406,24 @@ def getPower(players):
             p[k].append(pt[k])
                 
     
+def playerNames(hometeam, awayteam):
+    for k in hometeam.keys():
+        infile = open('Player_ID.csv','r')
+        rows = csv.reader(infile,delimiter=',')
+    
+    
+        for row in rows:
+            if k == row[0]:
+                hometeam[k]['name'] = row[1]
+
+    for j in awayteam.keys():
+        infile = open('Player_ID.csv','r')
+        rows = csv.reader(infile,delimiter=',')
+    
+    
+        for row in rows:
+            if j == row[0]:
+                awayteam[j]['name'] = row[1]
 
 
         
