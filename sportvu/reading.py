@@ -200,8 +200,9 @@ def get_player_data(files):
 
     
     print("Reordering the players in the dictionaries...")
-    nplayers = len(players[10])
-    for i in range(0,nplayers):
+    nsnapshots = len(players[10])
+    for i in range(0,nsnapshots):
+        #print(i,nsnapshots)
         for p in players:
             #print(p)
             teamid = p[i][0]
@@ -256,6 +257,24 @@ def get_player_data(files):
     
     getMinsPlayed(awayteam, awayplayers)
     getMinsPlayed(hometeam, homeplayers)
+
+    #print("ALMOST AT END")
+
+    #'''
+    entries = [ players,homeplayers,awayplayers,hometeam,awayteam,ball, homeScore, awayScore, sc]
+    for entry in entries:
+        #print(type(entry))
+        if type(entry) is dict:
+            #print("FOUND DICT")
+            for key in entry.keys():
+                #print("\t",type(entry[key]))
+                if type(entry[key]) is dict:
+                    #print("FOUND ANOTHER DICT")
+                    for key2 in entry[key].keys():
+                        if type(entry[key][key2]) is list:
+                            #print("HERE: ",key,key2)
+                            entry[key][key2] = np.array(entry[key][key2])
+    #'''
     
     return players,homeplayers,awayplayers,hometeam,awayteam,ball, homeScore, awayScore, sc
 
@@ -285,6 +304,7 @@ def shots(shotclock):
                     shotTimes.append(0.0)
         else:
             shotTimes.append(-1)
+    shotTimes = np.array(shotTimes)
     return shotTimes
 
 def distanceTraveled(x,y,z):
@@ -292,6 +312,7 @@ def distanceTraveled(x,y,z):
     for i in range(len(x)-1):
         d.append(np.sqrt((x[i+1]-x[i])**2 + (y[i+1]-y[i])**2 + (z[i+1]-z[i])**2) * .3048)
     d.append(np.sqrt((x[i+1]-x[i])**2 + (y[i+1]-y[i])**2 + (z[i+1]-z[i])**2) * .3048)
+    d = np.array(d)
     return d
 
 ####
@@ -315,6 +336,9 @@ def velocity(d,t):
     for j in range(0,len(v)):
         if v[j] > 10:
                 v[j] = v[j-1]
+
+    v = np.array(v)
+    time = np.array(time)
 
     return v,time
 
@@ -367,6 +391,7 @@ def getKineticEnergy(p):
         else:
             ke.append(-1)
             
+    ke = np.array(ke)
     return ke
 
 def appendKineticEnergy(players):
@@ -406,26 +431,19 @@ def getPower(players):
             p[k].append(pt[k])
                 
     
+################################################################################
 def playerNames(hometeam, awayteam):
+
+    data = np.loadtxt('Player_ID.csv',skiprows=1,delimiter=',',unpack=True,dtype=bytes)
+    ids = data[0].astype(str)
+    names = data[1].astype(str)
+
     for k in hometeam.keys():
-        infile = open('Player_ID.csv','r')
-        rows = csv.reader(infile,delimiter=',')
-    
-    
-        for row in rows:
-            if k == row[0]:
-                hometeam[k]['name'] = row[1]
-
-    for j in awayteam.keys():
-        infile = open('Player_ID.csv','r')
-        rows = csv.reader(infile,delimiter=',')
-    
-    
-        for row in rows:
-            if j == row[0]:
-                awayteam[j]['name'] = row[1]
-
-
+        index = ids.tolist().index(k)
+        hometeam[k]["name"] = names[index]
         
-
+    for k in awayteam.keys():
+        index = ids.tolist().index(k)
+        awayteam[k]["name"] = names[index]
+        
 
