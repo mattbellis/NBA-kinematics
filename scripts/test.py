@@ -12,3 +12,12 @@ infilename = ['Sportvu_Data/quarter1.XML']
 
 players,homeplayers,awayplayers,hometeam,awayteam,ball, homeScore, awayScore, sc = r.get_player_data(infilename)
 r.playerNames(hometeam,awayteam)
+
+p = hometeam['295809']
+v = p['v']
+t = p['veloTime']
+
+plt.figure()
+plt.plot(t,v)
+
+plt.show()

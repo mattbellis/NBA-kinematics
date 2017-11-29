@@ -12,11 +12,8 @@ def get_player_data(files):
     playerdata[playerdata==''] = '0.0'
     pd_masses = playerdata[2].astype(float)/2.2
     
-    
     homeScore = []
     awayScore = []
-  
-
 
     sc = []
     
@@ -43,6 +40,7 @@ def get_player_data(files):
  
 
         q = (int)(sequences.get('period'))
+
         for s in sequences:
             sc.append(s.get('shot-clock'))
             t = float(s.get('game-clock'))
@@ -140,6 +138,7 @@ def get_player_data(files):
     hometeam = {}
     awayteam = {}
     ball = {}
+    '''
     print("Calculating velocities....")
     getVelocity(players)
     print("Calculating energies....")
@@ -149,6 +148,7 @@ def get_player_data(files):
     getPower(players)
     #get_mass(awayteam)
     #etMass(hometeam)
+    '''
     print("Initializing keys....")
     
     for h in homeplayers:
@@ -157,16 +157,16 @@ def get_player_data(files):
         hometeam[str(h)]['y'] = []
         hometeam[str(h)]['z'] = []
         hometeam[str(h)]['gameTime'] = []
-        hometeam[str(h)]['v'] = []
+        #hometeam[str(h)]['v'] = []
         
-        hometeam[str(h)]['veloTime'] = []
+        #hometeam[str(h)]['veloTime'] = []
         
         hometeam[str(h)]['m'] = []
 
-        hometeam[str(h)]['ke'] = []
-        hometeam[str(h)]['power'] = []
+        #hometeam[str(h)]['ke'] = []
+        #hometeam[str(h)]['power'] = []
         hometeam[str(h)]['mins'] = 0
-        hometeam[str(h)]['powerTime'] = []
+        #hometeam[str(h)]['powerTime'] = []
         
 
     for h in awayplayers:
@@ -175,17 +175,17 @@ def get_player_data(files):
         awayteam[str(h)]['y'] = []
         awayteam[str(h)]['z'] = []
         awayteam[str(h)]['gameTime'] = []
-        awayteam[str(h)]['v'] = []
+        #awayteam[str(h)]['v'] = []
 
-        awayteam[str(h)]['veloTime'] = []
+        #awayteam[str(h)]['veloTime'] = []
         
         awayteam[str(h)]['m'] = []
 
         
-        awayteam[str(h)]['ke'] = []
-        awayteam[str(h)]['power'] = []
+        #awayteam[str(h)]['ke'] = []
+        #awayteam[str(h)]['power'] = []
         awayteam[str(h)]['mins'] = 0
-        awayteam[str(h)]['powerTime'] = []
+        #awayteam[str(h)]['powerTime'] = []
 
       
     for h in balls:
@@ -211,12 +211,12 @@ def get_player_data(files):
             y = p[i][3]
             z = p[i][4]
             gt = p[i][5]
-            v = p[i][7]
+            #v = p[i][7]
             m = p[i][6]
-            vt = p[i][8]
-            ke = p[i][9]
-            power = p[i][10]
-            powerTime = p[i][11]
+            #vt = p[i][8]
+            #ke = p[i][9]
+            #power = p[i][10]
+            #powerTime = p[i][11]
             #print(teamid,homeid)
             if teamid==homeid:
                 hometeam[pid]['x'].append(x)
@@ -224,11 +224,11 @@ def get_player_data(files):
                 hometeam[pid]['z'].append(z)
                 hometeam[pid]['m'].append(m)
                 hometeam[pid]['gameTime'].append(gt)
-                hometeam[pid]['v'].append(v)
-                hometeam[pid]['veloTime'].append(vt)
-                hometeam[pid]['ke'].append(ke)
-                hometeam[pid]['power'].append(power)
-                hometeam[pid]['powerTime'].append(powerTime)
+                #hometeam[pid]['v'].append(v)
+                #hometeam[pid]['veloTime'].append(vt)
+                #hometeam[pid]['ke'].append(ke)
+                #hometeam[pid]['power'].append(power)
+                #hometeam[pid]['powerTime'].append(powerTime)
 
             elif teamid==awayid:
                 awayteam[pid]['x'].append(x)
@@ -236,21 +236,35 @@ def get_player_data(files):
                 awayteam[pid]['z'].append(z)
                 awayteam[pid]['m'].append(m)
                 awayteam[pid]['gameTime'].append(gt)
-                awayteam[pid]['v'].append(v)
-                awayteam[pid]['veloTime'].append(vt)
-                awayteam[pid]['ke'].append(ke)
-                awayteam[pid]['power'].append(power)
-                awayteam[pid]['powerTime'].append(powerTime)
+                #awayteam[pid]['v'].append(v)
+                #awayteam[pid]['veloTime'].append(vt)
+                #awayteam[pid]['ke'].append(ke)
+                #awayteam[pid]['power'].append(power)
+                #awayteam[pid]['powerTime'].append(powerTime)
             
             elif teamid==ballid:
                 ball[pid]['x'].append(x)
                 ball[pid]['y'].append(y)
                 ball[pid]['z'].append(z)
                 ball[pid]['t'].append(gt)
-                ball[pid]['v'].append(v)
+                #ball[pid]['v'].append(v)
                 ball[pid]['m'].append(m)
                 
-                
+    for team in [hometeam, awayteam]:
+        for key in team.keys():
+
+            player = team[key]
+
+            player['x'] = np.array(player['x'])
+            player['y'] = np.array(player['y'])
+            player['z'] = np.array(player['z'])
+            player['gameTime'] = np.array(player['gameTime'])
+
+            x,y,z,t = player['x'],player['y'],player['x'],player['gameTime']
+            v,veloTime,dt = getVelocity(x,y,z,t)
+            player['v'] = v
+            player['veloTime'] = veloTime
+            player['dt'] = dt
 
                 
     sc = shots(sc)
@@ -342,41 +356,68 @@ def velocity(d,t):
 
     return v,time
 
-def getVelocity(players):
-    for p in players:
-        x = []
-        y = []
-        z = []
-        t = []
-        
-        for i in range(0, len(p)):
-            x.append(p[i][2])
-            y.append(p[i][3])
-            z.append(p[i][4])
-            t.append(p[i][5])
-            
-        d = distanceTraveled(x,y,z)
-        v,time = velocity(d,t)
-        
-        p[0].append(v[0])
-        p[0].append(time[0])
+################################################################################
+def getVelocity(x,y,z,t):
 
-        p[len(p)-1].append(v[len(v)-1])
-        p[len(p)-1].append(time[len(time)-1])
-        p[len(p)-2].append(v[len(v)-2])
-        #### bug area i think ########
-        p[len(p)-2].append(time[len(time)-2])
-        for k in range(1,len(p)-2):
-        #print len(v), len(players[0])
-    
-            p[k].append(v[k])
-            p[k].append(time[k])
+    index = t>0
+    x = x[index]
+    y = y[index]
+    z = z[index]
+    t = t[index]
+
+    dx = np.zeros(len(x))
+    dy = np.zeros(len(x))
+    dz = np.zeros(len(x))
+    dt = np.zeros(len(x))
+    d = np.zeros(len(x))
+    v = -1*np.ones(len(x))
+    veloTime = t.copy()
+
+    # Do all the *middle* ones
+    dx[1:-1] = (x[2:] - x[0:-2])
+    dy[1:-1] = (y[2:] - y[0:-2])
+    dz[1:-1] = (z[2:] - z[0:-2])
+    dt[1:-1] = (t[2:] - t[0:-2])
+
+    #v[1:-1] = (x[2:] - x[0:-2])/(t[2:] - t[0:-2])
+
+    # Do the first point
+    dx[0] = (x[1] - x[0])
+    dy[0] = (y[1] - y[0])
+    dz[0] = (z[1] - z[0])
+    dt[0] = (t[1] - t[0])
+
+    # Do the last point
+    #v[-1] = (x[-1] - x[-2])/(t[-1] - t[-2])
+    dx[-1] = (x[-1] - x[-2])
+    dy[-1] = (y[-1] - y[-2])
+    dz[-1] = (z[-1] - z[-2])
+    dt[-1] = (t[-1] - t[-2])
+
+    d = np.sqrt(dx*dx + dy*dy + dz*dz)
+    # coordinates were in feet so convert to meters
+    d /= 3.28084
+    v = d/dt
+
+    # Some weird hiccups with the time. Either timeouts or on/off the court. 
+    v[dt<0.01] = -1
+    v[dt>0.09] = -1
+
+    # Get rid of super-high speeds
+    v[v>10] = -1
+
+    index = v>=0
+    v = v[index]
+    veloTime = veloTime[index]
+    dt = dt[index]
+
+    return v,veloTime,dt
+
+################################################################################
+
 
         
         
-        
-        #for k in range(1,len(p)-2):
-        #print len(v), len(players[0])
         
 def getKineticEnergy(p):
     v = []
