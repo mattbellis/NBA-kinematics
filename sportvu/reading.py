@@ -18,7 +18,10 @@ def get_player_data(files):
     sc = []
     
     players = []
+    homeplayers = {}
+    awayplayers = {}
     ball = []
+
     for i in range(0,11):
         players.append([])
 
@@ -26,12 +29,16 @@ def get_player_data(files):
     player_ids_away = []
     ball_ids = []
 
+    homeids = []
+    awayids = []
+
     homeid = None
     awayid = None
     ballid = -1
     
     print("Getting positions....")
     for k in range(0, len(files)):
+        print("Getting data from %s" % (files[k]))
         tree = ET.parse(files[k])
         root = tree.getroot()
         sequences = root[0][4][0][11]
@@ -70,20 +77,22 @@ def get_player_data(files):
                         awayid = int(vals[0])
 
                     teamid = int(vals[0])
-                    pid = int(vals[1])
+                    pid = str(vals[1])
                     x = float(vals[2])
                     y = float(vals[3])
                     z = float(vals[4])
                     #m = get_mass(str(pid))
                     
                     
+                    '''
                     m = 0.6237
-                    if pid>=0:
+                    if int(pid)>=0:
                         massindex = pd_ids.tolist().index(pid)
                         if massindex>=0:
                             m = pd_masses[massindex]
+                    '''
                     
-                    players[i].append([teamid,pid,x,y,z,t,m])
+                    players[i].append([teamid,pid,x,y,z,t])
 
                     if teamid==homeid:
                         player_ids_home.append(pid)
@@ -91,7 +100,25 @@ def get_player_data(files):
                         player_ids_away.append(pid)
                     if teamid==ballid:
                         ball_ids.append(pid)
-                        
+
+                    if i>=1 and i<6:
+                        homeids.append(pid)
+                        keys = homeplayers.keys()
+                        if pid in keys:
+                            homeplayers[pid].append([teamid,pid,x,y,z,t])
+                        else:
+                            homeplayers[pid] = []
+                            homeplayers[pid].append([teamid,pid,x,y,z,t])
+                    elif i>=6:
+                        awayids.append(pid)
+                        keys = awayplayers.keys()
+                        if pid in keys:
+                            awayplayers[pid].append([teamid,pid,x,y,z,t])
+                        else:
+                            awayplayers[pid] = []
+                            awayplayers[pid].append([teamid,pid,x,y,z,t])
+
+            '''
             elif len(locs) == 10 and len(players[0]) > 0:
                 #print len(players[0])
                 #print len(players[0][len(players[0])-1])
@@ -130,13 +157,112 @@ def get_player_data(files):
                     if teamid==ballid:
                         ball_ids.append(pid)
                     
-                    
+            '''
 
-    homeplayers = np.unique(player_ids_home) 
-    awayplayers = np.unique(player_ids_away) 
+                    
+    print("Read in data and reordering the players...")
+    for i,player in enumerate(players):
+        #player = players[key]
+        temp = np.array(player)
+        temp = temp.transpose()
+        tempplayer = {}
+        tempplayer['x'] = np.array(temp[2]).astype(float)
+        tempplayer['y'] = np.array(temp[3]).astype(float)
+        tempplayer['z'] = np.array(temp[4]).astype(float)
+        tempplayer['t'] = np.array(temp[5]).astype(float)
+        #tempplayer['gameTime'] = np.array(temp[5]).astype(float)
+        players[i] = tempplayer
+
+    alltimes = players[0]['t']
+    #print(len(alltimes))
+    alltimes = alltimes[alltimes>=0]
+    #print(len(alltimes))
+    alltimes = np.unique(alltimes)
+
+    print("Reordering the hometeam players...")
+    for key in homeplayers.keys():
+        player = homeplayers[key]
+        temp = np.array(player)
+        temp = temp.transpose()
+        tempplayer = {}
+        x = np.array(temp[2]).astype(float)
+        y = np.array(temp[3]).astype(float)
+        z = np.array(temp[4]).astype(float)
+        tempplayer['t'] = np.array(temp[5]).astype(float)
+        tempplayer['gameTime'] = alltimes
+        homeplayers[key] = tempplayer
+
+        tempplayer['x'] = np.zeros(len(alltimes))
+        tempplayer['y'] = np.zeros(len(alltimes))
+        tempplayer['z'] = np.zeros(len(alltimes))
+
+        tcount = 0
+        ptimes = tempplayer['t']
+        maxtcount = len(ptimes)
+        #print(maxtcount,len(alltimes))
+        for i,t in enumerate(alltimes):
+            found_one = False
+            while tcount < maxtcount and found_one is False:
+                #print(i,t,tcount,ptimes[tcount],abs(ptimes[tcount]-t))
+                if abs(ptimes[tcount]-t)<0.03: # The 0.03 is because of some funky 0.01 times. Weird. 
+                    xi,yi,zi = x[tcount],y[tcount],z[tcount]
+                    tempplayer['x'][i] = xi
+                    tempplayer['y'][i] = yi
+                    tempplayer['z'][i] = zi
+                    found_one = True # If we found one, we don't need to go further
+                    tcount -= 1
+                elif ptimes[tcount]-t>0.1:
+                    break # Too far. 
+                tcount += 1
+            
+        tempplayer['t'] = tempplayer['gameTime'] 
+
+    print("Reordering the awayteam players...")
+    for key in awayplayers.keys():
+        player = awayplayers[key]
+        temp = np.array(player)
+        temp = temp.transpose()
+        tempplayer = {}
+        x = np.array(temp[2]).astype(float)
+        y = np.array(temp[3]).astype(float)
+        z = np.array(temp[4]).astype(float)
+        tempplayer['t'] = np.array(temp[5]).astype(float)
+        tempplayer['gameTime'] = alltimes
+        awayplayers[key] = tempplayer
+
+        tempplayer['x'] = np.zeros(len(alltimes))
+        tempplayer['y'] = np.zeros(len(alltimes))
+        tempplayer['z'] = np.zeros(len(alltimes))
+
+        tcount = 0
+        ptimes = tempplayer['t']
+        maxtcount = len(ptimes)
+        #print(maxtcount,len(alltimes))
+        for i,t in enumerate(alltimes):
+            found_one = False
+            while tcount < maxtcount and found_one is False:
+                #print(i,t,tcount,ptimes[tcount],abs(ptimes[tcount]-t))
+                if abs(ptimes[tcount]-t)<0.03: # The 0.03 is because of some funky 0.01 times. Weird. 
+                    xi,yi,zi = x[tcount],y[tcount],z[tcount]
+                    tempplayer['x'][i] = xi
+                    tempplayer['y'][i] = yi
+                    tempplayer['z'][i] = zi
+                    found_one = True # If we found one, we don't need to go further
+                    tcount -= 1
+                elif ptimes[tcount]-t>0.1:
+                    break # Too far. 
+                tcount += 1
+            
+        tempplayer['t'] = tempplayer['gameTime'] 
+
+
+    hometeam = homeplayers
+    awayteam = awayplayers
+    #homeplayers = np.unique(player_ids_home) 
+    #awayplayers = np.unique(player_ids_away) 
     balls = np.unique(ball_ids)
-    hometeam = {}
-    awayteam = {}
+    #hometeam = {}
+    #awayteam = {}
     ball = {}
     '''
     print("Calculating velocities....")
@@ -151,6 +277,7 @@ def get_player_data(files):
     '''
     print("Initializing keys....")
     
+    '''
     for h in homeplayers:
         hometeam[str(h)] = {}
         hometeam[str(h)]['x'] = []
@@ -186,6 +313,7 @@ def get_player_data(files):
         #awayteam[str(h)]['power'] = []
         awayteam[str(h)]['mins'] = 0
         #awayteam[str(h)]['powerTime'] = []
+    '''
 
       
     for h in balls:
@@ -199,6 +327,7 @@ def get_player_data(files):
         ball[str(h)]['m'] = []
 
     
+    '''
     print("Reordering the players in the dictionaries...")
     nsnapshots = len(players[10])
     for i in range(0,nsnapshots):
@@ -249,16 +378,17 @@ def get_player_data(files):
                 ball[pid]['t'].append(gt)
                 #ball[pid]['v'].append(v)
                 ball[pid]['m'].append(m)
+    '''
                 
     for team in [hometeam, awayteam]:
         for key in team.keys():
 
             player = team[key]
 
-            player['x'] = np.array(player['x'])
-            player['y'] = np.array(player['y'])
-            player['z'] = np.array(player['z'])
-            player['gameTime'] = np.array(player['gameTime'])
+            #player['x'] = np.array(player['x'])
+            #player['y'] = np.array(player['y'])
+            #player['z'] = np.array(player['z'])
+            #player['gameTime'] = np.array(player['gameTime'])
 
             x,y,z,t = player['x'],player['y'],player['x'],player['gameTime']
             v,veloTime,dt = getVelocity(x,y,z,t)
@@ -266,11 +396,24 @@ def get_player_data(files):
             player['veloTime'] = veloTime
             player['dt'] = dt
 
+            # Frames are 25 times second
+            # We need to make sure we don't count the times when the game clock is stopped.
+            count = 0
+            timesteps = t
+            nsteps = len(timesteps)
+            #print(nsteps)
+            for istep in range(nsteps-1):
+                if t[istep] < t[istep+1]:
+                    count += 1
+            player['mins'] = count/25./60
+
+        addPlayerNamesAndMasses(team)
+
                 
     sc = shots(sc)
     
-    getMinsPlayed(awayteam, awayplayers)
-    getMinsPlayed(hometeam, homeplayers)
+    #getMinsPlayed(awayteam, awayplayers)
+    #getMinsPlayed(hometeam, homeplayers)
 
     #print("ALMOST AT END")
 
@@ -473,18 +616,18 @@ def getPower(players):
                 
     
 ################################################################################
-def playerNames(hometeam, awayteam):
+def addPlayerNamesAndMasses(team):
 
     data = np.loadtxt('Player_ID.csv',skiprows=1,delimiter=',',unpack=True,dtype=bytes)
     ids = data[0].astype(str)
     names = data[1].astype(str)
+    masses = data[2].astype(str)
 
-    for k in hometeam.keys():
-        index = ids.tolist().index(k)
-        hometeam[k]["name"] = names[index]
-        
-    for k in awayteam.keys():
-        index = ids.tolist().index(k)
-        awayteam[k]["name"] = names[index]
+    for k in team.keys():
+        index = ids.tolist().index(str(k))
+        team[k]["name"] = names[index]
+        #print("masses: ",masses[index],type(masses[index]),names[index])
+        if masses[index].isnumeric():
+            team[k]["mass"] = 0.453592*float(masses[index])
         
 
